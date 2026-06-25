@@ -1,12 +1,13 @@
 'use client';
 
-import React, { useMemo, useCallback } from 'react';
+import React, { useMemo, useCallback, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import clsx from 'clsx';
 import { step1Schema } from '@/schemas/loanFormSchemas';
 import { useLoanForm } from '@/context/LoanFormContext';
 import { calculateEMI, formatINR, LOAN_RATES } from '@/utils/helpers';
+import ValidationToast from '@/components/ValidationToast';
 
 interface Step1Props {
   onNext: () => void;
@@ -20,6 +21,8 @@ const loanPurposeOptions = {
 
 export default function Step1LoanDetails({ onNext }: Step1Props) {
   const { state, updateField } = useLoanForm();
+  const [showToast, setShowToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
 
   const {
     register,
@@ -64,20 +67,38 @@ export default function Step1LoanDetails({ onNext }: Step1Props) {
       updateField('loanPurpose', data.loanPurpose);
       updateField('referralCode', data.referralCode);
 
-      // Scroll to first error if validation failed
-      const firstError = document.querySelector('[aria-invalid="true"]');
-      if (firstError) {
-        firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        return;
-      }
-
       onNext();
     },
     [updateField, onNext]
   );
 
+  const handleInvalid = useCallback(
+    (errors: any) => {
+      const errorCount = Object.keys(errors).length;
+      const message = `${errorCount} field${errorCount > 1 ? 's require' : ' requires'} attention`;
+      setToastMessage(message);
+      setShowToast(true);
+      
+      // Auto-dismiss after 4 seconds
+      const timer = setTimeout(() => setShowToast(false), 4000);
+      
+      // Scroll to first error
+      setTimeout(() => {
+        document.querySelector('[aria-invalid="true"]')?.scrollIntoView({
+          behavior: 'smooth',
+          block: 'center',
+        });
+      }, 100);
+
+      return () => clearTimeout(timer);
+    },
+    []
+  );
+
   return (
-    <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
+    <>
+      {showToast && <ValidationToast message={toastMessage} onClose={() => setShowToast(false)} />}
+      <form onSubmit={handleSubmit(handleFormSubmit, handleInvalid)} className="space-y-6">
       {/* Loan Type */}
       <div>
         <label htmlFor="loanType" className="block text-sm font-semibold text-gray-900 mb-2">
@@ -261,5 +282,6 @@ export default function Step1LoanDetails({ onNext }: Step1Props) {
         Continue to Next Step
       </button>
     </form>
+    </>
   );
 }
