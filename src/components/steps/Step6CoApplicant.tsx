@@ -22,7 +22,7 @@ export default function Step6CoApplicant({ onNext, onSkip }: Step6Props) {
     formState: { errors, isValid },
   } = useForm({
     resolver: zodResolver(step6Schema),
-    mode: 'onChange',
+    mode: 'onSubmit',
     defaultValues: {
       coApplicantName: state.coApplicantName || '',
       coApplicantRelationship: state.coApplicantRelationship || '',
@@ -33,11 +33,19 @@ export default function Step6CoApplicant({ onNext, onSkip }: Step6Props) {
   });
 
   const handleFormSubmit = (data: any) => {
+    // Auto-scroll to first error on validation failure
+    const firstError = document.querySelector('[aria-invalid="true"]');
+    if (firstError) {
+      firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
+
     updateField('coApplicantName', data.coApplicantName);
     updateField('coApplicantRelationship', data.coApplicantRelationship);
     updateField('coApplicantPAN', data.coApplicantPAN.toUpperCase());
     updateField('coApplicantIncome', data.coApplicantIncome.toString());
     updateField('coApplicantConsent', data.coApplicantConsent);
+    updateField('coApplicantSignature', data.coApplicantSignature);
     onNext();
   };
 

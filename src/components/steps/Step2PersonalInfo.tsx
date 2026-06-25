@@ -21,7 +21,7 @@ export default function Step2PersonalInfo({ onNext }: Step2Props) {
     formState: { errors, isValid },
   } = useForm({
     resolver: zodResolver(step2Schema),
-    mode: 'onChange',
+    mode: 'onSubmit',
     defaultValues: {
       fullName: state.fullName || '',
       dateOfBirth: state.dateOfBirth || '',
@@ -36,6 +36,13 @@ export default function Step2PersonalInfo({ onNext }: Step2Props) {
   });
 
   const handleFormSubmit = (data: any) => {
+    // Auto-scroll to first error on validation failure
+    const firstError = document.querySelector('[aria-invalid="true"]');
+    if (firstError) {
+      firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
+
     updateField('fullName', data.fullName);
     updateField('dateOfBirth', data.dateOfBirth);
     updateField('gender', data.gender);
@@ -65,6 +72,7 @@ export default function Step2PersonalInfo({ onNext }: Step2Props) {
               type="text"
               placeholder="Enter your full name"
               error={errors.fullName?.message}
+              aria-invalid={!!errors.fullName}
               aria-describedby={errors.fullName ? 'fullName-error' : undefined}
             />
           )}
@@ -89,6 +97,7 @@ export default function Step2PersonalInfo({ onNext }: Step2Props) {
                 {...field}
                 type="date"
                 error={errors.dateOfBirth?.message}
+                aria-invalid={!!errors.dateOfBirth}
                 aria-describedby={errors.dateOfBirth ? 'dateOfBirth-error' : undefined}
               />
             )}

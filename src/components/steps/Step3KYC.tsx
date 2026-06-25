@@ -24,7 +24,7 @@ export default function Step3KYC({ onNext }: Step3Props) {
     formState: { errors, isValid },
   } = useForm({
     resolver: zodResolver(step3Schema),
-    mode: 'onChange',
+    mode: 'onSubmit',
     defaultValues: {
       panNumber: (state.panNumber || '').toUpperCase(),
       aadhaarNumber: state.aadhaarNumber || '',
@@ -58,6 +58,13 @@ export default function Step3KYC({ onNext }: Step3Props) {
   };
 
   const handleFormSubmit = (data: any) => {
+    // Auto-scroll to first error on validation failure
+    const firstError = document.querySelector('[aria-invalid="true"]');
+    if (firstError) {
+      firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
+
     updateField('panNumber', data.panNumber.toUpperCase());
     updateField('aadhaarNumber', data.aadhaarNumber);
     updateField('aadhaarConsent', data.aadhaarConsent);

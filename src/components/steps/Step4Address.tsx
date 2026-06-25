@@ -24,7 +24,7 @@ export default function Step4Address({ onNext }: Step4Props) {
     formState: { errors, isValid },
   } = useForm({
     resolver: zodResolver(step4Schema),
-    mode: 'onChange',
+    mode: 'onSubmit',
     defaultValues: {
       currentAddressLine1: state.currentAddressLine1 || '',
       currentAddressLine2: state.currentAddressLine2 || '',
@@ -87,6 +87,13 @@ export default function Step4Address({ onNext }: Step4Props) {
   }, [sameAsPermanent, setValue, watch]);
 
   const handleFormSubmit = (data: any) => {
+    // Auto-scroll to first error on validation failure
+    const firstError = document.querySelector('[aria-invalid="true"]');
+    if (firstError) {
+      firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
+
     updateField('currentAddressLine1', data.currentAddressLine1);
     updateField('currentAddressLine2', data.currentAddressLine2);
     updateField('currentPinCode', data.currentPinCode);

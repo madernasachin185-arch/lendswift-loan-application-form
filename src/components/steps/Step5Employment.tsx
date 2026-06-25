@@ -26,7 +26,7 @@ export default function Step5Employment({ onNext }: Step5Props) {
     reset,
   } = useForm({
     resolver: zodResolver(schema),
-    mode: 'onChange',
+    mode: 'onSubmit',
     defaultValues:
       employmentType === 'Self-Employed'
         ? {
@@ -56,6 +56,13 @@ export default function Step5Employment({ onNext }: Step5Props) {
   }, [watchedEmploymentType, employmentType, clearEmploymentFields]);
 
   const handleFormSubmit = (data: any) => {
+    // Auto-scroll to first error on validation failure
+    const firstError = document.querySelector('[aria-invalid="true"]');
+    if (firstError) {
+      firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
+
     updateField('employmentType', data.employmentType);
 
     if (data.employmentType === 'Salaried') {

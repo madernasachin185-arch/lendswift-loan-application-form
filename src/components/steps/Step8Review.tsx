@@ -21,7 +21,7 @@ export default function Step8Review({ onSubmit, onEditStep }: Step8Props) {
     formState: { errors, isValid },
   } = useForm({
     resolver: zodResolver(step8Schema),
-    mode: 'onChange',
+    mode: 'onSubmit',
     defaultValues: {
       consent1: state.consent1 || false,
       consent2: state.consent2 || false,
@@ -37,6 +37,13 @@ export default function Step8Review({ onSubmit, onEditStep }: Step8Props) {
   const emiDetails = calculateEMI(loanAmount, rate, loanTenure);
 
   const handleFormSubmit = (data: any) => {
+    // Auto-scroll to first error on validation failure
+    const firstError = document.querySelector('[aria-invalid="true"]');
+    if (firstError) {
+      firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
+
     updateField('consent1', data.consent1);
     updateField('consent2', data.consent2);
     updateField('consent3', data.consent3);
