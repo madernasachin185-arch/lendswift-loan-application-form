@@ -114,46 +114,60 @@ export function deleteDraft(loanType: string = 'pending') {
 
 // Image compression
 export async function compressImage(file: File): Promise<Blob> {
-  return new Promise((resolve) => {
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = (e) => {
-      const img = new Image();
-      img.src = e.target?.result as string;
-      img.onload = () => {
-        const canvas = document.createElement('canvas');
-        let width = img.width;
-        let height = img.height;
+  return new Promise((resolve, reject) => {
+    try {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onerror = () => reject(new Error('FileReader error'));
+      reader.onload = (e) => {
+        try {
+          const img = new Image();
+          img.src = e.target?.result as string;
+          img.onerror = () => reject(new Error('Image load error'));
+          img.onload = () => {
+            try {
+              const canvas = document.createElement('canvas');
+              let width = img.width;
+              let height = img.height;
 
-        // Max width 1200px
-        if (width > 1200) {
-          height = (height * 1200) / width;
-          width = 1200;
-        }
+              // Max width 1200px
+              if (width > 1200) {
+                height = (height * 1200) / width;
+                width = 1200;
+              }
 
-        canvas.width = width;
-        canvas.height = height;
-        const ctx = canvas.getContext('2d');
-        ctx?.drawImage(img, 0, 0, width, height);
+              canvas.width = width;
+              canvas.height = height;
+              const ctx = canvas.getContext('2d');
+              ctx?.drawImage(img, 0, 0, width, height);
 
-        // Reduce quality until size < 2MB
-        let quality = 0.8;
-        canvas.toBlob(
-          (blob) => {
-            if (!blob || blob.size < 2 * 1024 * 1024 || quality <= 0.3) {
-              resolve(blob || file);
-            } else {
-              quality -= 0.1;
-              canvas.toBlob((retryBlob) => {
-                resolve(retryBlob || file);
-              }, 'image/jpeg', quality);
+              // Reduce quality until size < 2MB
+              let quality = 0.8;
+              canvas.toBlob(
+                (blob) => {
+                  if (!blob || blob.size < 2 * 1024 * 1024 || quality <= 0.3) {
+                    resolve(blob || file);
+                  } else {
+                    quality -= 0.1;
+                    canvas.toBlob((retryBlob) => {
+                      resolve(retryBlob || file);
+                    }, 'image/jpeg', quality);
+                  }
+                },
+                'image/jpeg',
+                quality
+              );
+            } catch (error) {
+              reject(error);
             }
-          },
-          'image/jpeg',
-          quality
-        );
+          };
+        } catch (error) {
+          reject(error);
+        }
       };
-    };
+    } catch (error) {
+      reject(error);
+    }
   });
 }
 

@@ -23,11 +23,15 @@ export default function LoanApplicationPage() {
     setMounted(true);
 
     const checkForDraft = () => {
-      const loanType = state.loanType || 'pending';
-      const draft = loadDraft(loanType);
+      try {
+        const loanType = state.loanType || 'pending';
+        const draft = loadDraft(loanType);
 
-      if (draft && draft.data) {
-        setDraftWarning({ show: true, hasDraft: true, loanType });
+        if (draft && draft.data) {
+          setDraftWarning({ show: true, hasDraft: true, loanType });
+        }
+      } catch (error) {
+        console.error('[v0] Error checking draft:', error);
       }
     };
 
@@ -40,39 +44,56 @@ export default function LoanApplicationPage() {
     if (!mounted || !state.loanType) return;
 
     const autoSaveInterval = setInterval(() => {
-      const dataToSave = {
-        ...state,
-        uploadedDocuments: {}, // Don't save files
-      };
+      try {
+        const dataToSave = {
+          ...state,
+          uploadedDocuments: {}, // Don't save files
+        };
 
-      saveDraft(dataToSave, state.loanType);
-      console.log('[v0] Draft auto-saved for', state.loanType);
+        saveDraft(dataToSave, state.loanType);
+        console.log('[v0] Draft auto-saved for', state.loanType);
+      } catch (error) {
+        console.error('[v0] Error during auto-save:', error);
+      }
     }, 30000); // 30 seconds
 
     return () => clearInterval(autoSaveInterval);
   }, [state, mounted]);
 
   const handleLoadDraft = useCallback(() => {
-    const loanType = state.loanType || 'pending';
-    const draft = loadDraft(loanType);
+    try {
+      const loanType = state.loanType || 'pending';
+      const draft = loadDraft(loanType);
 
-    if (draft && draft.data) {
-      batchUpdate(draft.data);
-      setDraftWarning({ show: false, hasDraft: false, loanType: '' });
+      if (draft && draft.data) {
+        batchUpdate(draft.data);
+        setDraftWarning({ show: false, hasDraft: false, loanType: '' });
+      }
+    } catch (error) {
+      console.error('[v0] Error loading draft:', error);
     }
   }, [state.loanType, batchUpdate]);
 
   const handleDeleteDraft = useCallback(() => {
-    const loanType = state.loanType || 'pending';
-    deleteDraft(loanType);
-    setDraftWarning({ show: false, hasDraft: false, loanType: '' });
+    try {
+      const loanType = state.loanType || 'pending';
+      deleteDraft(loanType);
+      setDraftWarning({ show: false, hasDraft: false, loanType: '' });
+    } catch (error) {
+      console.error('[v0] Error deleting draft:', error);
+    }
   }, [state.loanType]);
 
   const handleApplicationComplete = useCallback(() => {
-    setIsApplicationComplete(true);
-    // Clear draft after successful submission
-    if (state.loanType) {
-      deleteDraft(state.loanType);
+    try {
+      setIsApplicationComplete(true);
+      // Clear draft after successful submission
+      if (state.loanType) {
+        deleteDraft(state.loanType);
+      }
+    } catch (error) {
+      console.error('[v0] Error completing application:', error);
+      setIsApplicationComplete(true);
     }
   }, [state.loanType]);
 

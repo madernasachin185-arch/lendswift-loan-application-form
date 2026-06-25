@@ -25,8 +25,8 @@ export default function Step1LoanDetails({ onNext }: Step1Props) {
     mode: 'onChange',
     defaultValues: {
       loanType: state.loanType || '',
-      loanAmount: state.loanAmount ? Number(state.loanAmount) : 0,
-      loanTenure: state.loanTenure ? Number(state.loanTenure) : 0,
+      loanAmount: state.loanAmount ? Number(state.loanAmount) : undefined,
+      loanTenure: state.loanTenure ? Number(state.loanTenure) : undefined,
       loanPurpose: state.loanPurpose || '',
       referralCode: state.referralCode || '',
     },
