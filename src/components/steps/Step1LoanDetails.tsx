@@ -96,10 +96,11 @@ export default function Step1LoanDetails({ onNext }: Step1Props) {
           id="loanType"
           className={clsx(
             'w-full px-4 py-2 border rounded-lg transition-colors font-sans',
+            'text-gray-900 bg-white',
             'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
             errors.loanType
               ? 'border-red-500 bg-red-50'
-              : 'border-gray-300 bg-white hover:border-gray-400'
+              : 'border-gray-300 hover:border-gray-400'
           )}
           aria-describedby={errors.loanType ? 'loanType-error' : undefined}
           aria-invalid={!!errors.loanType}
@@ -130,10 +131,11 @@ export default function Step1LoanDetails({ onNext }: Step1Props) {
           max={10000000}
           className={clsx(
             'w-full px-4 py-2 border rounded-lg transition-colors font-sans',
+            'text-gray-900 bg-white placeholder:text-gray-400',
             'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
             errors.loanAmount
               ? 'border-red-500 bg-red-50'
-              : 'border-gray-300 bg-white hover:border-gray-400'
+              : 'border-gray-300 hover:border-gray-400'
           )}
           aria-describedby={errors.loanAmount ? 'loanAmount-error' : undefined}
           aria-invalid={!!errors.loanAmount}
@@ -159,10 +161,11 @@ export default function Step1LoanDetails({ onNext }: Step1Props) {
           max={360}
           className={clsx(
             'w-full px-4 py-2 border rounded-lg transition-colors font-sans',
+            'text-gray-900 bg-white placeholder:text-gray-400',
             'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
             errors.loanTenure
               ? 'border-red-500 bg-red-50'
-              : 'border-gray-300 bg-white hover:border-gray-400'
+              : 'border-gray-300 hover:border-gray-400'
           )}
           aria-describedby={errors.loanTenure ? 'loanTenure-error' : undefined}
           aria-invalid={!!errors.loanTenure}
@@ -185,10 +188,11 @@ export default function Step1LoanDetails({ onNext }: Step1Props) {
             id="loanPurpose"
             className={clsx(
               'w-full px-4 py-2 border rounded-lg transition-colors font-sans',
+              'text-gray-900 bg-white',
               'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
               errors.loanPurpose
                 ? 'border-red-500 bg-red-50'
-                : 'border-gray-300 bg-white hover:border-gray-400'
+                : 'border-gray-300 hover:border-gray-400'
             )}
             aria-describedby={errors.loanPurpose ? 'loanPurpose-error' : undefined}
             aria-invalid={!!errors.loanPurpose}
@@ -220,8 +224,9 @@ export default function Step1LoanDetails({ onNext }: Step1Props) {
           placeholder="Optional referral code"
           className={clsx(
             'w-full px-4 py-2 border rounded-lg transition-colors font-sans',
+            'text-gray-900 bg-white placeholder:text-gray-400',
             'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
-            'border-gray-300 bg-white hover:border-gray-400'
+            'border-gray-300 hover:border-gray-400'
           )}
         />
       </div>
