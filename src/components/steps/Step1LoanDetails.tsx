@@ -3,11 +3,10 @@
 import React, { useMemo } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import clsx from 'clsx';
 import { step1Schema } from '@/schemas/loanFormSchemas';
 import { useLoanForm } from '@/context/LoanFormContext';
 import { calculateEMI, formatINR, LOAN_RATES } from '@/utils/helpers';
-import Input from '../common/Input';
-import Select from '../common/Select';
 
 interface Step1Props {
   onNext: () => void;
@@ -20,10 +19,10 @@ export default function Step1LoanDetails({ onNext }: Step1Props) {
     control,
     handleSubmit,
     watch,
-    formState: { errors, isValid },
+    formState: { errors, isValid, isDirty },
   } = useForm({
     resolver: zodResolver(step1Schema),
-    mode: 'onChange',
+    mode: 'onSubmit',
     defaultValues: {
       loanType: state.loanType || '',
       loanAmount: state.loanAmount ? parseInt(state.loanAmount).toString() : '',
@@ -82,24 +81,31 @@ export default function Step1LoanDetails({ onNext }: Step1Props) {
   return (
     <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
       <div>
-        <label className="block text-sm font-semibold text-gray-900 mb-2">
+        <label htmlFor="loanType" className="block text-sm font-semibold text-gray-900 mb-2">
           Loan Type <span className="text-red-500">*</span>
         </label>
         <Controller
           name="loanType"
           control={control}
           render={({ field }) => (
-            <Select
+            <select
               {...field}
-              options={[
-                { value: 'Personal', label: 'Personal Loan' },
-                { value: 'Home', label: 'Home Loan' },
-                { value: 'Business', label: 'Business Loan' },
-              ]}
-              placeholder="Select loan type"
-              error={errors.loanType?.message}
+              id="loanType"
+              className={clsx(
+                'w-full px-4 py-2 border rounded-lg transition-colors font-sans',
+                'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
+                errors.loanType
+                  ? 'border-red-500 bg-red-50'
+                  : 'border-gray-300 bg-white hover:border-gray-400'
+              )}
               aria-describedby={errors.loanType ? 'loanType-error' : undefined}
-            />
+              aria-invalid={!!errors.loanType}
+            >
+              <option value="">Select loan type</option>
+              <option value="Personal">Personal Loan</option>
+              <option value="Home">Home Loan</option>
+              <option value="Business">Business Loan</option>
+            </select>
           )}
         />
         {errors.loanType && (
@@ -110,21 +116,29 @@ export default function Step1LoanDetails({ onNext }: Step1Props) {
       </div>
 
       <div>
-        <label className="block text-sm font-semibold text-gray-900 mb-2">
+        <label htmlFor="loanAmount" className="block text-sm font-semibold text-gray-900 mb-2">
           Loan Amount (₹) <span className="text-red-500">*</span>
         </label>
         <Controller
           name="loanAmount"
           control={control}
           render={({ field }) => (
-            <Input
+            <input
               {...field}
+              id="loanAmount"
               type="number"
               placeholder="₹50,000 to ₹1,00,00,000"
-              error={errors.loanAmount?.message}
               min="50000"
               max="10000000"
+              className={clsx(
+                'w-full px-4 py-2 border rounded-lg transition-colors font-sans',
+                'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
+                errors.loanAmount
+                  ? 'border-red-500 bg-red-50'
+                  : 'border-gray-300 bg-white hover:border-gray-400'
+              )}
               aria-describedby={errors.loanAmount ? 'loanAmount-error' : undefined}
+              aria-invalid={!!errors.loanAmount}
             />
           )}
         />
@@ -136,21 +150,29 @@ export default function Step1LoanDetails({ onNext }: Step1Props) {
       </div>
 
       <div>
-        <label className="block text-sm font-semibold text-gray-900 mb-2">
+        <label htmlFor="loanTenure" className="block text-sm font-semibold text-gray-900 mb-2">
           Loan Tenure (Months) <span className="text-red-500">*</span>
         </label>
         <Controller
           name="loanTenure"
           control={control}
           render={({ field }) => (
-            <Input
+            <input
               {...field}
+              id="loanTenure"
               type="number"
               placeholder="6 to 360 months"
-              error={errors.loanTenure?.message}
               min="6"
               max="360"
+              className={clsx(
+                'w-full px-4 py-2 border rounded-lg transition-colors font-sans',
+                'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
+                errors.loanTenure
+                  ? 'border-red-500 bg-red-50'
+                  : 'border-gray-300 bg-white hover:border-gray-400'
+              )}
               aria-describedby={errors.loanTenure ? 'loanTenure-error' : undefined}
+              aria-invalid={!!errors.loanTenure}
             />
           )}
         />
@@ -163,25 +185,33 @@ export default function Step1LoanDetails({ onNext }: Step1Props) {
 
       {loanType && (
         <div>
-          <label className="block text-sm font-semibold text-gray-900 mb-2">
+          <label htmlFor="loanPurpose" className="block text-sm font-semibold text-gray-900 mb-2">
             Loan Purpose <span className="text-red-500">*</span>
           </label>
           <Controller
             name="loanPurpose"
             control={control}
             render={({ field }) => (
-              <Select
+              <select
                 {...field}
-                options={(loanPurposeOptions[loanType as keyof typeof loanPurposeOptions] || []).map(
-                  purpose => ({
-                    value: purpose,
-                    label: purpose,
-                  })
+                id="loanPurpose"
+                className={clsx(
+                  'w-full px-4 py-2 border rounded-lg transition-colors font-sans',
+                  'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
+                  errors.loanPurpose
+                    ? 'border-red-500 bg-red-50'
+                    : 'border-gray-300 bg-white hover:border-gray-400'
                 )}
-                placeholder="Select loan purpose"
-                error={errors.loanPurpose?.message}
                 aria-describedby={errors.loanPurpose ? 'loanPurpose-error' : undefined}
-              />
+                aria-invalid={!!errors.loanPurpose}
+              >
+                <option value="">Select loan purpose</option>
+                {(loanPurposeOptions[loanType as keyof typeof loanPurposeOptions] || []).map(purpose => (
+                  <option key={purpose} value={purpose}>
+                    {purpose}
+                  </option>
+                ))}
+              </select>
             )}
           />
           {errors.loanPurpose && (
@@ -193,15 +223,23 @@ export default function Step1LoanDetails({ onNext }: Step1Props) {
       )}
 
       <div>
-        <label className="block text-sm font-semibold text-gray-900 mb-2">Referral Code</label>
+        <label htmlFor="referralCode" className="block text-sm font-semibold text-gray-900 mb-2">
+          Referral Code
+        </label>
         <Controller
           name="referralCode"
           control={control}
           render={({ field }) => (
-            <Input
+            <input
               {...field}
+              id="referralCode"
               type="text"
               placeholder="Optional referral code"
+              className={clsx(
+                'w-full px-4 py-2 border rounded-lg transition-colors font-sans',
+                'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
+                'border-gray-300 bg-white hover:border-gray-400'
+              )}
             />
           )}
         />
