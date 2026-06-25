@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useMemo } from 'react';
-import { Controller, useForm } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import clsx from 'clsx';
 import { step1Schema } from '@/schemas/loanFormSchemas';
@@ -16,10 +16,10 @@ export default function Step1LoanDetails({ onNext }: Step1Props) {
   const { state, updateField } = useLoanForm();
 
   const {
-    control,
+    register,
     handleSubmit,
     watch,
-    formState: { errors, isValid, isDirty, isValidating },
+    formState: { errors, isValid },
   } = useForm({
     resolver: zodResolver(step1Schema),
     mode: 'onChange',
@@ -79,44 +79,29 @@ export default function Step1LoanDetails({ onNext }: Step1Props) {
   };
 
   return (
-    <div className="space-y-6">
-      {/* Debug Panel */}
-      <div className="bg-gray-100 border border-gray-300 rounded-lg p-4 text-xs font-mono max-h-32 overflow-y-auto">
-        <p className="font-bold text-gray-700 mb-2">Form Values Debug:</p>
-        <pre className="text-gray-600 whitespace-pre-wrap break-words">
-          {JSON.stringify(watchedValues, null, 2)}
-        </pre>
-      </div>
-
     <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
       <div>
         <label htmlFor="loanType" className="block text-sm font-semibold text-gray-900 mb-2">
           Loan Type <span className="text-red-500">*</span>
         </label>
-        <Controller
-          name="loanType"
-          control={control}
-          render={({ field }) => (
-            <select
-              {...field}
-              id="loanType"
-              className={clsx(
-                'w-full px-4 py-2 border rounded-lg transition-colors font-sans',
-                'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
-                errors.loanType
-                  ? 'border-red-500 bg-red-50'
-                  : 'border-gray-300 bg-white hover:border-gray-400'
-              )}
-              aria-describedby={errors.loanType ? 'loanType-error' : undefined}
-              aria-invalid={!!errors.loanType}
-            >
-              <option value="">Select loan type</option>
-              <option value="Personal">Personal Loan</option>
-              <option value="Home">Home Loan</option>
-              <option value="Business">Business Loan</option>
-            </select>
+        <select
+          {...register('loanType')}
+          id="loanType"
+          className={clsx(
+            'w-full px-4 py-2 border rounded-lg transition-colors font-sans',
+            'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
+            errors.loanType
+              ? 'border-red-500 bg-red-50'
+              : 'border-gray-300 bg-white hover:border-gray-400'
           )}
-        />
+          aria-describedby={errors.loanType ? 'loanType-error' : undefined}
+          aria-invalid={!!errors.loanType}
+        >
+          <option value="">Select loan type</option>
+          <option value="Personal">Personal Loan</option>
+          <option value="Home">Home Loan</option>
+          <option value="Business">Business Loan</option>
+        </select>
         {errors.loanType && (
           <p id="loanType-error" className="text-sm text-red-500 mt-1" role="alert">
             {errors.loanType.message}
@@ -128,28 +113,21 @@ export default function Step1LoanDetails({ onNext }: Step1Props) {
         <label htmlFor="loanAmount" className="block text-sm font-semibold text-gray-900 mb-2">
           Loan Amount (₹) <span className="text-red-500">*</span>
         </label>
-        <Controller
-          name="loanAmount"
-          control={control}
-          render={({ field }) => (
-            <input
-              {...field}
-              id="loanAmount"
-              type="number"
-              placeholder="₹50,000 to ₹1,00,00,000"
-              min="50000"
-              max="10000000"
-              className={clsx(
-                'w-full px-4 py-2 border rounded-lg transition-colors font-sans',
-                'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
-                errors.loanAmount
-                  ? 'border-red-500 bg-red-50'
-                  : 'border-gray-300 bg-white hover:border-gray-400'
-              )}
-              aria-describedby={errors.loanAmount ? 'loanAmount-error' : undefined}
-              aria-invalid={!!errors.loanAmount}
-            />
+        <input
+          {...register('loanAmount')}
+          id="loanAmount"
+          type="text"
+          inputMode="numeric"
+          placeholder="₹50,000 to ₹1,00,00,000"
+          className={clsx(
+            'w-full px-4 py-2 border rounded-lg transition-colors font-sans',
+            'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
+            errors.loanAmount
+              ? 'border-red-500 bg-red-50'
+              : 'border-gray-300 bg-white hover:border-gray-400'
           )}
+          aria-describedby={errors.loanAmount ? 'loanAmount-error' : undefined}
+          aria-invalid={!!errors.loanAmount}
         />
         {errors.loanAmount && (
           <p id="loanAmount-error" className="text-sm text-red-500 mt-1" role="alert">
@@ -162,28 +140,21 @@ export default function Step1LoanDetails({ onNext }: Step1Props) {
         <label htmlFor="loanTenure" className="block text-sm font-semibold text-gray-900 mb-2">
           Loan Tenure (Months) <span className="text-red-500">*</span>
         </label>
-        <Controller
-          name="loanTenure"
-          control={control}
-          render={({ field }) => (
-            <input
-              {...field}
-              id="loanTenure"
-              type="number"
-              placeholder="6 to 360 months"
-              min="6"
-              max="360"
-              className={clsx(
-                'w-full px-4 py-2 border rounded-lg transition-colors font-sans',
-                'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
-                errors.loanTenure
-                  ? 'border-red-500 bg-red-50'
-                  : 'border-gray-300 bg-white hover:border-gray-400'
-              )}
-              aria-describedby={errors.loanTenure ? 'loanTenure-error' : undefined}
-              aria-invalid={!!errors.loanTenure}
-            />
+        <input
+          {...register('loanTenure')}
+          id="loanTenure"
+          type="text"
+          inputMode="numeric"
+          placeholder="6 to 360 months"
+          className={clsx(
+            'w-full px-4 py-2 border rounded-lg transition-colors font-sans',
+            'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
+            errors.loanTenure
+              ? 'border-red-500 bg-red-50'
+              : 'border-gray-300 bg-white hover:border-gray-400'
           )}
+          aria-describedby={errors.loanTenure ? 'loanTenure-error' : undefined}
+          aria-invalid={!!errors.loanTenure}
         />
         {errors.loanTenure && (
           <p id="loanTenure-error" className="text-sm text-red-500 mt-1" role="alert">
@@ -197,32 +168,26 @@ export default function Step1LoanDetails({ onNext }: Step1Props) {
           <label htmlFor="loanPurpose" className="block text-sm font-semibold text-gray-900 mb-2">
             Loan Purpose <span className="text-red-500">*</span>
           </label>
-          <Controller
-            name="loanPurpose"
-            control={control}
-            render={({ field }) => (
-              <select
-                {...field}
-                id="loanPurpose"
-                className={clsx(
-                  'w-full px-4 py-2 border rounded-lg transition-colors font-sans',
-                  'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
-                  errors.loanPurpose
-                    ? 'border-red-500 bg-red-50'
-                    : 'border-gray-300 bg-white hover:border-gray-400'
-                )}
-                aria-describedby={errors.loanPurpose ? 'loanPurpose-error' : undefined}
-                aria-invalid={!!errors.loanPurpose}
-              >
-                <option value="">Select loan purpose</option>
-                {(loanPurposeOptions[loanType as keyof typeof loanPurposeOptions] || []).map(purpose => (
-                  <option key={purpose} value={purpose}>
-                    {purpose}
-                  </option>
-                ))}
-              </select>
+          <select
+            {...register('loanPurpose')}
+            id="loanPurpose"
+            className={clsx(
+              'w-full px-4 py-2 border rounded-lg transition-colors font-sans',
+              'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
+              errors.loanPurpose
+                ? 'border-red-500 bg-red-50'
+                : 'border-gray-300 bg-white hover:border-gray-400'
             )}
-          />
+            aria-describedby={errors.loanPurpose ? 'loanPurpose-error' : undefined}
+            aria-invalid={!!errors.loanPurpose}
+          >
+            <option value="">Select loan purpose</option>
+            {(loanPurposeOptions[loanType as keyof typeof loanPurposeOptions] || []).map(purpose => (
+              <option key={purpose} value={purpose}>
+                {purpose}
+              </option>
+            ))}
+          </select>
           {errors.loanPurpose && (
             <p id="loanPurpose-error" className="text-sm text-red-500 mt-1" role="alert">
               {errors.loanPurpose.message}
@@ -235,21 +200,15 @@ export default function Step1LoanDetails({ onNext }: Step1Props) {
         <label htmlFor="referralCode" className="block text-sm font-semibold text-gray-900 mb-2">
           Referral Code
         </label>
-        <Controller
-          name="referralCode"
-          control={control}
-          render={({ field }) => (
-            <input
-              {...field}
-              id="referralCode"
-              type="text"
-              placeholder="Optional referral code"
-              className={clsx(
-                'w-full px-4 py-2 border rounded-lg transition-colors font-sans',
-                'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
-                'border-gray-300 bg-white hover:border-gray-400'
-              )}
-            />
+        <input
+          {...register('referralCode')}
+          id="referralCode"
+          type="text"
+          placeholder="Optional referral code"
+          className={clsx(
+            'w-full px-4 py-2 border rounded-lg transition-colors font-sans',
+            'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
+            'border-gray-300 bg-white hover:border-gray-400'
           )}
         />
       </div>
@@ -291,6 +250,5 @@ export default function Step1LoanDetails({ onNext }: Step1Props) {
         Continue to Next Step
       </button>
     </form>
-    </div>
   );
 }
