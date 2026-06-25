@@ -19,14 +19,14 @@ export default function Step1LoanDetails({ onNext }: Step1Props) {
     control,
     handleSubmit,
     watch,
-    formState: { errors, isValid, isDirty },
+    formState: { errors, isValid, isDirty, isValidating },
   } = useForm({
     resolver: zodResolver(step1Schema),
-    mode: 'onSubmit',
+    mode: 'onChange',
     defaultValues: {
       loanType: state.loanType || '',
-      loanAmount: state.loanAmount ? parseInt(state.loanAmount).toString() : '',
-      loanTenure: state.loanTenure ? state.loanTenure.toString() : '',
+      loanAmount: state.loanAmount || '',
+      loanTenure: state.loanTenure || '',
       loanPurpose: state.loanPurpose || '',
       referralCode: state.referralCode || '',
     },
@@ -79,6 +79,15 @@ export default function Step1LoanDetails({ onNext }: Step1Props) {
   };
 
   return (
+    <div className="space-y-6">
+      {/* Debug Panel */}
+      <div className="bg-gray-100 border border-gray-300 rounded-lg p-4 text-xs font-mono max-h-32 overflow-y-auto">
+        <p className="font-bold text-gray-700 mb-2">Form Values Debug:</p>
+        <pre className="text-gray-600 whitespace-pre-wrap break-words">
+          {JSON.stringify(watchedValues, null, 2)}
+        </pre>
+      </div>
+
     <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
       <div>
         <label htmlFor="loanType" className="block text-sm font-semibold text-gray-900 mb-2">
@@ -282,5 +291,6 @@ export default function Step1LoanDetails({ onNext }: Step1Props) {
         Continue to Next Step
       </button>
     </form>
+    </div>
   );
 }
