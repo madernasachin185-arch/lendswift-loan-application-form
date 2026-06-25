@@ -7,28 +7,12 @@ const MOBILE_REGEX = /^[6-9]\d{9}$/;
 
 export const step1Schema = z.object({
   loanType: z.enum(['Personal', 'Home', 'Business'], { message: 'Select a valid loan type' }),
-  loanAmount: z.string({ required_error: 'Loan amount is required' })
-    .min(1, 'Loan amount is required')
-    .refine(val => !isNaN(parseFloat(val)), 'Loan amount must be a valid number')
-    .refine(val => {
-      const num = parseFloat(val);
-      return num >= 50000;
-    }, 'Minimum loan amount is ₹50,000')
-    .refine(val => {
-      const num = parseFloat(val);
-      return num <= 10000000;
-    }, 'Maximum loan amount is ₹1 Crore'),
-  loanTenure: z.string({ required_error: 'Loan tenure is required' })
-    .min(1, 'Loan tenure is required')
-    .refine(val => !isNaN(parseInt(val, 10)), 'Loan tenure must be a valid number')
-    .refine(val => {
-      const num = parseInt(val, 10);
-      return num >= 6;
-    }, 'Minimum tenure is 6 months')
-    .refine(val => {
-      const num = parseInt(val, 10);
-      return num <= 360;
-    }, 'Maximum tenure is 30 years'),
+  loanAmount: z.number({ required_error: 'Loan amount is required' })
+    .min(50000, 'Minimum loan amount is ₹50,000')
+    .max(10000000, 'Maximum loan amount is ₹1 Crore'),
+  loanTenure: z.number({ required_error: 'Loan tenure is required' })
+    .min(6, 'Minimum tenure is 6 months')
+    .max(360, 'Maximum tenure is 30 years'),
   loanPurpose: z.string({ required_error: 'Loan purpose is required' }).min(1, 'Loan purpose is required'),
   referralCode: z.string().optional().default(''),
 });

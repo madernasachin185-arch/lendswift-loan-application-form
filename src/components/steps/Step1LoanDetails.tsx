@@ -25,20 +25,26 @@ export default function Step1LoanDetails({ onNext }: Step1Props) {
     mode: 'onChange',
     defaultValues: {
       loanType: state.loanType || '',
-      loanAmount: state.loanAmount || '',
-      loanTenure: state.loanTenure || '',
+      loanAmount: state.loanAmount ? Number(state.loanAmount) : 0,
+      loanTenure: state.loanTenure ? Number(state.loanTenure) : 0,
       loanPurpose: state.loanPurpose || '',
       referralCode: state.referralCode || '',
     },
   });
 
   const watchedValues = watch();
-  const loanAmount = watchedValues.loanAmount ? parseFloat(watchedValues.loanAmount) : 0;
-  const loanTenure = watchedValues.loanTenure ? parseInt(watchedValues.loanTenure) : 0;
+  const loanAmount = watchedValues.loanAmount || 0;
+  const loanTenure = watchedValues.loanTenure || 0;
   const loanType = watchedValues.loanType as keyof typeof LOAN_RATES;
 
+  // EMI Summary: only calculate when both values are valid numbers > 0
   const emiDetails = useMemo(() => {
-    if (!loanAmount || !loanTenure || !loanType) return null;
+    if (!loanAmount || !loanTenure || isNaN(loanAmount) || isNaN(loanTenure)) {
+      return null;
+    }
+    if (!loanType || loanAmount <= 0 || loanTenure <= 0) {
+      return null;
+    }
     const rate = LOAN_RATES[loanType] || 0;
     return calculateEMI(loanAmount, rate, loanTenure);
   }, [loanAmount, loanTenure, loanType]);
@@ -80,6 +86,7 @@ export default function Step1LoanDetails({ onNext }: Step1Props) {
 
   return (
     <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
+      {/* Loan Type */}
       <div>
         <label htmlFor="loanType" className="block text-sm font-semibold text-gray-900 mb-2">
           Loan Type <span className="text-red-500">*</span>
@@ -109,16 +116,18 @@ export default function Step1LoanDetails({ onNext }: Step1Props) {
         )}
       </div>
 
+      {/* Loan Amount */}
       <div>
         <label htmlFor="loanAmount" className="block text-sm font-semibold text-gray-900 mb-2">
           Loan Amount (₹) <span className="text-red-500">*</span>
         </label>
         <input
-          {...register('loanAmount')}
+          {...register('loanAmount', { valueAsNumber: true })}
           id="loanAmount"
-          type="text"
-          inputMode="numeric"
+          type="number"
           placeholder="₹50,000 to ₹1,00,00,000"
+          min={50000}
+          max={10000000}
           className={clsx(
             'w-full px-4 py-2 border rounded-lg transition-colors font-sans',
             'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
@@ -136,16 +145,18 @@ export default function Step1LoanDetails({ onNext }: Step1Props) {
         )}
       </div>
 
+      {/* Loan Tenure */}
       <div>
         <label htmlFor="loanTenure" className="block text-sm font-semibold text-gray-900 mb-2">
           Loan Tenure (Months) <span className="text-red-500">*</span>
         </label>
         <input
-          {...register('loanTenure')}
+          {...register('loanTenure', { valueAsNumber: true })}
           id="loanTenure"
-          type="text"
-          inputMode="numeric"
+          type="number"
           placeholder="6 to 360 months"
+          min={6}
+          max={360}
           className={clsx(
             'w-full px-4 py-2 border rounded-lg transition-colors font-sans',
             'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
@@ -163,6 +174,7 @@ export default function Step1LoanDetails({ onNext }: Step1Props) {
         )}
       </div>
 
+      {/* Loan Purpose */}
       {loanType && (
         <div>
           <label htmlFor="loanPurpose" className="block text-sm font-semibold text-gray-900 mb-2">
@@ -196,6 +208,7 @@ export default function Step1LoanDetails({ onNext }: Step1Props) {
         </div>
       )}
 
+      {/* Referral Code */}
       <div>
         <label htmlFor="referralCode" className="block text-sm font-semibold text-gray-900 mb-2">
           Referral Code
@@ -213,34 +226,44 @@ export default function Step1LoanDetails({ onNext }: Step1Props) {
         />
       </div>
 
-      {emiDetails && (
-        <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-6 space-y-3">
-          <h3 className="font-semibold text-gray-900">Loan Summary</h3>
-          <div className="grid grid-cols-2 gap-4 text-sm">
-            <div>
-              <p className="text-gray-600">Monthly EMI</p>
-              <p className="font-semibold text-gray-900">{formatINR(emiDetails.emi)}</p>
-            </div>
-            <div>
-              <p className="text-gray-600">Interest Rate</p>
-              <p className="font-semibold text-gray-900">{LOAN_RATES[loanType]}% p.a.</p>
-            </div>
-            <div>
-              <p className="text-gray-600">Processing Fee</p>
-              <p className="font-semibold text-gray-900">{formatINR(emiDetails.processingFee)}</p>
-            </div>
-            <div>
-              <p className="text-gray-600">Total Interest</p>
-              <p className="font-semibold text-gray-900">{formatINR(emiDetails.totalInterest)}</p>
-            </div>
-            <div className="col-span-2 border-t border-blue-200 pt-3">
-              <p className="text-gray-600">Total Repayment</p>
-              <p className="font-semibold text-gray-900">{formatINR(emiDetails.totalPayment + emiDetails.processingFee)}</p>
-            </div>
+      {/* Loan Summary - EMI */}
+      <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-6 space-y-3">
+        <h3 className="font-semibold text-gray-900">Loan Summary</h3>
+        <div className="grid grid-cols-2 gap-4 text-sm">
+          <div>
+            <p className="text-gray-600">Monthly EMI</p>
+            <p className="font-semibold text-gray-900">
+              {emiDetails ? formatINR(emiDetails.emi) : '—'}
+            </p>
+          </div>
+          <div>
+            <p className="text-gray-600">Interest Rate</p>
+            <p className="font-semibold text-gray-900">
+              {loanType ? `${LOAN_RATES[loanType]}% p.a.` : '—'}
+            </p>
+          </div>
+          <div>
+            <p className="text-gray-600">Processing Fee</p>
+            <p className="font-semibold text-gray-900">
+              {emiDetails ? formatINR(emiDetails.processingFee) : '—'}
+            </p>
+          </div>
+          <div>
+            <p className="text-gray-600">Total Interest</p>
+            <p className="font-semibold text-gray-900">
+              {emiDetails ? formatINR(emiDetails.totalInterest) : '—'}
+            </p>
+          </div>
+          <div className="col-span-2 border-t border-blue-200 pt-3">
+            <p className="text-gray-600">Total Repayment</p>
+            <p className="font-semibold text-gray-900">
+              {emiDetails ? formatINR(emiDetails.totalPayment + emiDetails.processingFee) : '—'}
+            </p>
           </div>
         </div>
-      )}
+      </div>
 
+      {/* Submit Button */}
       <button
         type="submit"
         disabled={!isValid}
