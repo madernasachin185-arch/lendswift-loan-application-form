@@ -108,8 +108,12 @@ export function loadDraft(loanType: string = 'pending'): DraftData | null {
 }
 
 export function deleteDraft(loanType: string = 'pending') {
-  const key = `lendswift_draft_${loanType}`;
-  localStorage.removeItem(key);
+  try {
+    const key = `lendswift_draft_${loanType}`;
+    localStorage.removeItem(key);
+  } catch (error) {
+    console.error('[v0] Error deleting draft:', error);
+  }
 }
 
 // Image compression
@@ -145,13 +149,21 @@ export async function compressImage(file: File): Promise<Blob> {
               let quality = 0.8;
               canvas.toBlob(
                 (blob) => {
-                  if (!blob || blob.size < 2 * 1024 * 1024 || quality <= 0.3) {
-                    resolve(blob || file);
-                  } else {
-                    quality -= 0.1;
-                    canvas.toBlob((retryBlob) => {
-                      resolve(retryBlob || file);
-                    }, 'image/jpeg', quality);
+                  try {
+                    if (!blob || blob.size < 2 * 1024 * 1024 || quality <= 0.3) {
+                      resolve(blob || file);
+                    } else {
+                      quality -= 0.1;
+                      canvas.toBlob((retryBlob) => {
+                        try {
+                          resolve(retryBlob || file);
+                        } catch (error) {
+                          reject(error);
+                        }
+                      }, 'image/jpeg', quality);
+                    }
+                  } catch (error) {
+                    reject(error);
                   }
                 },
                 'image/jpeg',
